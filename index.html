@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Astra — a journal written in stars</title>
+<meta name="description" content="Astra turns every journal entry into a star. Group memories into constellations, replay your sky over time, and see your moods light up.">
+<meta name="theme-color" content="#04050d">
+<meta property="og:title" content="Astra — a journal written in stars">
+<meta property="og:description" content="Every entry becomes a star. Every chapter of your life, a constellation.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2304050d'/%3E%3Cpath d='M16 4l2.6 9.4L28 16l-9.4 2.6L16 28l-2.6-9.4L4 16l9.4-2.6z' fill='%23f3e3c0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="sky" aria-label="Your journal sky. Each star is an entry."></canvas>
+
+<header class="brand">
+  <h1>Astra</h1>
+  <p>a journal written in stars</p>
+</header>
+
+<div class="top-actions">
+  <input id="search" class="pill" type="search" placeholder="Search your sky…" aria-label="Search entries">
+  <button id="reportBtn" class="ghost" aria-label="Sky report">Report</button>
+  <button id="menuBtn" class="ghost round" aria-label="Menu" aria-haspopup="true">⋯</button>
+  <div id="menu" class="menu" hidden>
+    <button data-act="list">All entries</button>
+    <button data-act="report">Sky report</button>
+    <button data-act="memory">Revisit a memory</button>
+    <button data-act="fit">Fit sky to screen</button>
+    <hr>
+    <button data-act="export">Export journal (.json)</button>
+    <button data-act="import">Import journal</button>
+    <button data-act="png">Save sky as image</button>
+    <hr>
+    <button data-act="clear" class="danger">Clear entire sky</button>
+    <button data-act="about">About Astra</button>
+  </div>
+</div>
+
+<div id="hint" class="hint" role="status"></div>
+
+<footer class="dock">
+  <button id="replayBtn" class="ghost round" aria-label="Replay your sky">▶</button>
+  <div class="timeline">
+    <input type="range" id="timeline" min="0" max="1000" value="1000" aria-label="Timeline">
+    <span id="timeLabel">Today</span>
+  </div>
+  <button id="newBtn" class="primary">✦ New star</button>
+</footer>
+
+<aside id="panel" class="panel" hidden>
+  <button class="close" id="panelClose" aria-label="Close">×</button>
+  <div class="meta"><span id="pDate"></span><span id="pMood" class="chip"></span></div>
+  <h2 id="pTitle"></h2>
+  <p id="pGroup" class="group"></p>
+  <p id="pMag" class="mag"></p>
+  <div id="pText" class="text"></div>
+  <div class="row"><button id="pPrev" class="ghost">← Earlier</button><button id="pNext" class="ghost">Later →</button></div>
+  <div class="row"><button id="pEdit" class="ghost">Edit</button><button id="pDel" class="ghost danger">Delete</button></div>
+</aside>
+
+<dialog id="editor">
+  <form id="editorForm" method="dialog">
+    <h2 id="edHead">A new star</h2>
+    <label class="field" for="fTitle">Title</label>
+    <input id="fTitle" class="input" maxlength="80" required placeholder="What happened today?">
+    <label class="field" for="fText">Entry</label>
+    <textarea id="fText" class="input" maxlength="4000" placeholder="Write freely. Only you can see this."></textarea>
+    <span class="field">Mood — sets the star's color</span>
+    <div id="fMoods" class="moods"></div>
+    <div class="two">
+      <div>
+        <label class="field" for="fGroup">Constellation</label>
+        <input id="fGroup" class="input" list="groups" maxlength="40" placeholder="e.g. Finals Week">
+        <datalist id="groups"></datalist>
+      </div>
+      <div>
+        <label class="field" for="fDate">Date</label>
+        <input id="fDate" class="input" type="date" required>
+      </div>
+    </div>
+    <label class="field" for="fMag">Brightness — how much it mattered <b id="fMagOut"></b></label>
+    <input id="fMag" type="range" min="1" max="5" value="3">
+    <div class="actions">
+      <button type="button" class="ghost" id="edCancel">Cancel</button>
+      <button type="submit" class="primary">Place star</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="report"><div id="reportBody"></div><div class="actions"><button class="ghost" data-close>Close</button></div></dialog>
+<dialog id="list"><h2>All entries</h2><div id="listBody" class="list"></div><div class="actions"><button class="ghost" data-close>Close</button></div></dialog>
+<dialog id="about">
+  <h2>About Astra</h2>
+  <p class="prose">Astra is a private journal where every entry becomes a star. Its mood sets the color, how much it mattered sets the brightness, and entries that share a chapter of your life join into a constellation.</p>
+  <p class="prose">Drag to pan, scroll or pinch to zoom, drag a star to move it. Use the timeline to see your sky on any past day, or press ▶ to watch it form.</p>
+  <p class="small">Everything is stored in your browser (localStorage) — nothing is uploaded. Built with plain HTML, CSS and JavaScript on the Canvas API. Developed with the help of an AI coding assistant (Claude Code). Fonts: Cormorant Garamond &amp; DM Mono (Google Fonts).</p>
+  <p class="small">Shortcuts: <kbd>N</kbd> new star · <kbd>/</kbd> search · <kbd>←</kbd><kbd>→</kbd> browse · <kbd>Esc</kbd> close</p>
+  <div class="actions"><button class="ghost" data-close>Close</button></div>
+</dialog>
+
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+<script src="app.js"></script>
+</body>
+</html>
